@@ -26,28 +26,22 @@ jobs:
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: 12266719
+          packages: ''
 
-      - name: Verificar SDK
+      - name: Instalar herramientas Android
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          which sdkmanager
-          sdkmanager --version
-
-      - name: Aceptar licencias
-        run: |
-          yes | sdkmanager --licenses || true
-
-      - name: Instalar componentes Android
-        run: |
-          sdkmanager --install \
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager"
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses < /dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install \
             "platform-tools" \
             "platforms;android-36" \
             "build-tools;36.0.0" \
             "ndk;29.0.14206865" \
             "cmake;3.22.1"
 
-      - name: Comprobar proyecto
+      - name: Comprobar archivos del proyecto
         run: |
           ls -la Oxygen/sonic3air/build/_android
           test -f Oxygen/sonic3air/build/_android/gradlew
@@ -56,7 +50,7 @@ jobs:
         working-directory: Oxygen/sonic3air/build/_android
         run: chmod +x gradlew
 
-      - name: Compilar APK
+      - name: Compilar APK de prueba
         working-directory: Oxygen/sonic3air/build/_android
         run: ./gradlew assembleDebug --stacktrace
 
